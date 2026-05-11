@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Up Your Game — RACE Prompting (Year 5)</title>
+
+<!-- Fonts: Clash Display (headings) + Satoshi (body) via Fontshare -->
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500&f[]=satoshi@400,500,700&display=swap">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — NEON CYBER THEME
+   Edit :root to change the whole look
+   =========================================== */
+:root {
+  --bg-primary:    #0a0f1c;
+  --bg-card:       #0f1628;
+  --bg-card-alt:   #111a30;
+  --cyan:          #00ffcc;
+  --magenta:       #ff00aa;
+  --blue:          #4488ff;
+  --gold:          #ffd166;
+  --text-primary:  #ffffff;
+  --text-muted:    #7a8bb0;
+  --text-dim:      #3a4a6a;
+  --border:        rgba(0,255,204,0.15);
+
+  --font-display:  'Clash Display', sans-serif;
+  --font-body:     'Satoshi', sans-serif;
+
+  /* Font scale multiplier — controlled by A+/A− buttons and ⌘./⌘, */
+  --font-scale:    1;
+
+  /* Typography — all clamp() × --font-scale for live resizing */
+  --title-size:    calc(clamp(2.2rem, 7vw, 5.5rem)    * var(--font-scale));
+  --h2-size:       calc(clamp(1.4rem, 3.5vw, 2.8rem)  * var(--font-scale));
+  --h3-size:       calc(clamp(1rem, 2.2vw, 1.6rem)    * var(--font-scale));
+  --body-size:     calc(clamp(0.78rem, 1.4vw, 1.05rem)* var(--font-scale));
+  --small-size:    calc(clamp(0.65rem, 1vw, 0.85rem)  * var(--font-scale));
+  --label-size:    calc(clamp(0.6rem, 0.9vw, 0.75rem) * var(--font-scale));
+
+  /* Spacing */
+  --slide-pad:     clamp(1.5rem, 5vw, 5rem);
+  --gap:           clamp(0.6rem, 1.5vh, 1.4rem);
+  --gap-sm:        clamp(0.3rem, 0.8vh, 0.7rem);
+
+  /* Animation easing */
+  --ease-expo:     cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===========================================
+   RESET & BASE
+   =========================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===========================================
+   SLIDE SYSTEM — JS-controlled, no scroll snap
+   All slides are stacked; only .active is shown
+   =========================================== */
+.slides-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.45s var(--ease-expo), transform 0.45s var(--ease-expo);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.slide.exit-left {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+/* ===========================================
+   GLOBAL BACKGROUND LAYERS
+   Applied to every slide via .slide::before/::after
+   =========================================== */
+.slide {
+  background: var(--bg-primary);
+}
+
+/* Grid overlay */
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--text-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-dim) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.18;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Scanline overlay */
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* All direct children sit above background layers */
+.slide > * { position: relative; z-index: 1; }
+
+/* ===========================================
+   VIEWPORT BASE — mandatory responsive rules
+   =========================================== */
+@media (max-height: 700px) {
+  :root {
+    --slide-pad:  clamp(1rem, 3vw, 2.5rem);
+    --gap:        clamp(0.4rem, 1vh, 0.9rem);
+    --h2-size:    clamp(1.1rem, 3vw, 2rem);
+    --title-size: clamp(1.6rem, 5.5vw, 3.5rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-pad:  clamp(0.75rem, 2.5vw, 1.8rem);
+    --gap:        clamp(0.3rem, 0.7vh, 0.6rem);
+    --title-size: clamp(1.3rem, 4.5vw, 2.5rem);
+    --body-size:  clamp(0.7rem, 1.1vw, 0.9rem);
+  }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-pad:  clamp(0.5rem, 2vw, 1.2rem);
+    --title-size: clamp(1.1rem, 4vw, 1.8rem);
+  }
+  .nav-dots { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide, .reveal, .reveal-left, .reveal-scale {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ===========================================
+   REVEAL ANIMATIONS — triggered by .active class
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.55s var(--ease-expo), transform 0.55s var(--ease-expo);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.55s var(--ease-expo), transform 0.55s var(--ease-expo);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.55s var(--ease-expo), transform 0.55s var(--ease-expo);
+}
+.slide.active .reveal,
+.slide.active .reveal-left,
+.slide.active .reveal-scale {
+  opacity: 1; transform: none;
+}
+
+/* Staggered delay for sequential reveals */
+.slide.active .d1 { transition-delay: 0.05s; }
+.slide.active .d2 { transition-delay: 0.15s; }
+.slide.active .d3 { transition-delay: 0.25s; }
+.slide.active .d4 { transition-delay: 0.35s; }
+.slide.active .d5 { transition-delay: 0.45s; }
+.slide.active .d6 { transition-delay: 0.55s; }
+.slide.active .d7 { transition-delay: 0.65s; }
+
+/* ===========================================
+   SHARED COMPONENTS
+   =========================================== */
+
+/* Pedagogy badge (I DO / WE DO / YOU DO) */
+.ped-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-display);
+  font-size: var(--label-size);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.35em 0.9em;
+  border-radius: 4px;
+  border: 1px solid;
+  width: fit-content;
+  margin-bottom: var(--gap-sm);
+}
+.ped-badge.i-do  { color: var(--cyan);    border-color: var(--cyan);    background: rgba(0,255,204,0.08); }
+.ped-badge.we-do { color: var(--magenta); border-color: var(--magenta); background: rgba(255,0,170,0.08); }
+.ped-badge.you-do{ color: var(--gold);    border-color: var(--gold);    background: rgba(255,209,102,0.08); }
+
+/* Slide inner content wrapper */
+.slide-inner {
+  padding: var(--slide-pad);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--gap);
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* Section eyebrow label */
+.eyebrow {
+  font-size: var(--label-size);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* Slide heading */
+.slide-title {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+/* Cyan underline accent */
+.accent-line {
+  width: clamp(2.5rem, 5vw, 4rem);
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+/* Body paragraph */
+.body-text {
+  font-size: var(--body-size);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Bullet list */
+.bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.bullet-list li {
+  font-size: var(--body-size);
+  color: var(--text-primary);
+  padding-left: 1.4em;
+  position: relative;
+  line-height: 1.45;
+}
+.bullet-list li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+/* Card style */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.8rem, 1.5vw, 1.4rem);
+}
+
+/* RACE letter chip */
+.race-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 1em;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.chip-r { background: rgba(0,255,204,0.15); color: var(--cyan);    border: 1px solid rgba(0,255,204,0.3); }
+.chip-a { background: rgba(255,0,170,0.15); color: var(--magenta); border: 1px solid rgba(255,0,170,0.3); }
+.chip-c { background: rgba(68,136,255,0.15); color: var(--blue);   border: 1px solid rgba(68,136,255,0.3); }
+.chip-e { background: rgba(255,209,102,0.15); color: var(--gold);  border: 1px solid rgba(255,209,102,0.3); }
+
+/* Star levels */
+.star-gold   { color: var(--gold); }
+.star-cyan   { color: var(--cyan); }
+.star-mag    { color: var(--magenta); }
+
+/* Neon glow text */
+.glow-cyan    { color: var(--cyan);    text-shadow: 0 0 25px rgba(0,255,204,0.5); }
+.glow-magenta { color: var(--magenta); text-shadow: 0 0 25px rgba(255,0,170,0.5); }
+
+/* Prompt code block */
+.prompt-block {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 0 8px 8px 0;
+  padding: clamp(0.7rem, 1.2vw, 1.2rem) clamp(0.8rem, 1.5vw, 1.5rem);
+  font-family: 'Courier New', monospace;
+  font-size: var(--body-size);
+  color: var(--cyan);
+  line-height: 1.5;
+}
+
+/* Two-column grid */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.8rem, 2vw, 2rem);
+  align-items: start;
+}
+
+/* Image in slides */
+.slide-img {
+  width: 100%;
+  max-height: min(44vh, 360px);
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,204,0.08);
+}
+
+/* ===========================================
+   PROGRESS BAR
+   =========================================== */
+.progress-bar-wrap {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.05);
+  z-index: 1000;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  box-shadow: 0 0 8px var(--cyan);
+  transition: width 0.4s var(--ease-expo);
+  width: 0%;
+}
+
+/* ===========================================
+   NAVIGATION DOTS
+   =========================================== */
+.nav-dots {
+  position: fixed;
+  right: clamp(0.8rem, 2vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 0.8vh, 0.6rem);
+  z-index: 1000;
+}
+.nav-dots button {
+  width: clamp(5px, 0.7vw, 7px);
+  height: clamp(5px, 0.7vw, 7px);
+  border-radius: 50%;
+  border: 1px solid var(--text-dim);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+.nav-dots button:hover { border-color: var(--text-muted); background: var(--text-muted); }
+.nav-dots button.active {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  transform: scale(1.3);
+}
+
+/* ===========================================
+   SLIDE COUNTER
+   =========================================== */
+.slide-counter {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  font-family: var(--font-display);
+  font-size: var(--label-size);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  z-index: 1000;
+}
+
+/* ===========================================
+   SLIDE 1: TITLE
+   =========================================== */
+.s1-orb {
+  position: absolute;
+  width: clamp(250px, 45vw, 600px);
+  height: clamp(250px, 45vw, 600px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,255,204,0.07) 0%, transparent 70%);
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.s1-ring {
+  position: absolute;
+  width: clamp(120px, 22vw, 280px);
+  height: clamp(120px, 22vw, 280px);
+  border: 1px solid rgba(0,255,204,0.15);
+  border-radius: 50%;
+  right: clamp(2rem, 8vw, 10rem);
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spin-slow 20s linear infinite;
+}
+.s1-ring::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(255,0,170,0.12);
+  border-radius: 50%;
+}
+@keyframes spin-slow { to { transform: translateY(-50%) rotate(360deg); } }
+
+.s1-title {
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: 700;
+  line-height: 0.95;
+  color: var(--text-primary);
+}
+.s1-subject {
+  font-size: var(--body-size);
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-top: var(--gap-sm);
+}
+.s1-meta {
+  display: flex;
+  gap: clamp(0.6rem, 1.5vw, 1.2rem);
+  flex-wrap: wrap;
+  margin-top: var(--gap);
+}
+.s1-pill {
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 0.35em 0.9em;
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.s1-bottom-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta), transparent);
+  animation: bar-grow 1s var(--ease-expo) 0.8s both;
+}
+@keyframes bar-grow { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); } }
+
+/* ===========================================
+   SLIDE 3: SUCCESS CRITERIA STARS
+   =========================================== */
+.star-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.7rem, 1.2vw, 1.2rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.star-card .level-label {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.star-card .level-desc {
+  font-size: var(--body-size);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.star-card.s1 { border-color: rgba(0,255,204,0.3); }
+.star-card.s2 { border-color: rgba(68,136,255,0.3); }
+.star-card.s3 { border-color: rgba(255,0,170,0.3); }
+
+/* ===========================================
+   SLIDE 4-5: VOCABULARY GRID
+   =========================================== */
+.vocab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+}
+.vocab-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.6rem, 1vw, 1rem);
+}
+.vocab-term {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3em;
+}
+.vocab-def {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===========================================
+   SLIDE 6: WHAT IS RACE (COMPARISON)
+   =========================================== */
+.compare-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.8rem, 1.5vw, 1.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  height: 100%;
+}
+.compare-box.today { border-color: rgba(0,255,204,0.35); background: rgba(0,255,204,0.04); }
+.compare-box .box-label {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.compare-box .box-tag {
+  font-size: var(--label-size);
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.compare-box .box-quote {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.45;
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+  padding: 0.5em 0.8em;
+}
+.compare-box .box-definition {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===========================================
+   SLIDE 9: RACE FRAMEWORK GRID
+   =========================================== */
+.race-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.6rem, 1.2vw, 1.1rem);
+}
+.race-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: clamp(0.8rem, 1.4vw, 1.3rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 0.8vh, 0.7rem);
+  border: 1px solid transparent;
+}
+.race-card.r { border-color: rgba(0,255,204,0.25); }
+.race-card.a { border-color: rgba(255,0,170,0.25); }
+.race-card.c { border-color: rgba(68,136,255,0.25); }
+.race-card.e { border-color: rgba(255,209,102,0.25); }
+
+.race-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.race-card-letter {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1;
+}
+.r .race-card-letter { color: var(--cyan); }
+.a .race-card-letter { color: var(--magenta); }
+.c .race-card-letter { color: var(--blue); }
+.e .race-card-letter { color: var(--gold); }
+
+.race-card-word {
+  font-family: var(--font-display);
+  font-size: var(--body-size);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.race-card-q {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+}
+.race-card-eg {
+  font-size: var(--small-size);
+  color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.35;
+}
+
+/* ===========================================
+   SLIDE 10: PLAN YOUR PROMPT — RACE TABLE
+   =========================================== */
+.race-table {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 0.8vh, 0.7rem);
+}
+.race-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(0.6rem, 1.2vw, 1.2rem);
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.5rem, 0.9vw, 0.9rem);
+}
+.race-row-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.race-row-q {
+  font-size: var(--body-size);
+  color: var(--text-muted);
+}
+
+/* ===========================================
+   SLIDE 12: YOUR TURN — TASK CARDS
+   =========================================== */
+.task-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(0.6rem, 1.2vw, 1.1rem);
+}
+.task-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.8rem, 1.4vw, 1.3rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.task-card.t1 { border-color: rgba(0,255,204,0.3); }
+.task-card.t2 { border-color: rgba(68,136,255,0.3); }
+.task-card.t3 { border-color: rgba(255,0,170,0.3); }
+.task-level {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.task-card.t1 .task-level { color: var(--cyan); }
+.task-card.t2 .task-level { color: var(--blue); }
+.task-card.t3 .task-level { color: var(--magenta); }
+.task-desc {
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.task-race {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  margin-top: auto;
+}
+.task-race-item {
+  font-size: var(--label-size);
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+/* ===========================================
+   SLIDE 14: EXIT TICKET
+   =========================================== */
+.exit-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.2vh, 1rem);
+}
+.exit-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(0.65rem, 1.2vw, 1rem) clamp(0.8rem, 1.5vw, 1.4rem);
+}
+.exit-statement {
+  font-size: var(--body-size);
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+.yes-no {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ===========================================
+   SLIDE 15: MISSION COMPLETE
+   =========================================== */
+.mission-stars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.mission-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  font-size: var(--body-size);
+  color: var(--text-muted);
+}
+.mission-item .stars { font-size: 1.1em; }
+
+/* Credits slide */
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.credit-line {
+  font-size: var(--small-size);
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ===========================================
+   FONT SCALE CONTROL — bottom-left corner
+   A− | 100% | A+   (also ⌘, / ⌘.)
+   =========================================== */
+.font-scale-ctrl {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  left: clamp(1rem, 2.5vw, 2rem);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 1000;
+  background: rgba(10, 15, 28, 0.88);
+  border: 1px solid rgba(0,255,204,0.2);
+  border-radius: 6px;
+  padding: 0.28em 0.45em;
+  backdrop-filter: blur(6px);
+}
+.font-scale-ctrl button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: clamp(0.6rem, 0.85vw, 0.72rem);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.2em 0.45em;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.font-scale-ctrl button:hover { color: var(--cyan); background: rgba(0,255,204,0.1); }
+.font-scale-ctrl button:active { transform: scale(0.92); }
+.font-scale-ctrl button:disabled { opacity: 0.25; cursor: default; }
+#fontScaleLabel {
+  font-family: var(--font-display);
+  font-size: clamp(0.55rem, 0.8vw, 0.68rem);
+  color: var(--text-dim);
+  min-width: 2.8em;
+  text-align: center;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+/* Divider + fullscreen icon button sit inside the same pill */
+.font-scale-ctrl .ctrl-divider {
+  width: 1px;
+  height: 1em;
+  background: rgba(0,255,204,0.25);
+  margin: 0 4px;
+}
+.font-scale-ctrl .fs-btn {
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  padding: 0.15em 0.4em;
+  line-height: 1;
+}
+/* ===========================================
+   CURSOR EFFECTS CANVAS
+   Full-viewport overlay for the glowing trail
+   and click-and-drag ink annotation.
+   pointer-events: none so clicks pass through.
+   =========================================== */
+#cursorFx {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ===========================================
+   SPEAKER NOTES PANEL — N key + triple-tap NEXT
+   =========================================== */
+.speaker-notes-panel {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(150%);
+  width: min(900px, 90vw);
+  max-height: 38vh;
+  z-index: 9000;
+  background: rgba(10, 15, 28, 0.97);
+  color: var(--text-primary);
+  padding: clamp(0.8rem, 1.5vw, 1.2rem) clamp(1rem, 2vw, 1.5rem);
+  border-radius: 12px;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  font-size: var(--small-size);
+  line-height: 1.55;
+  overflow-y: auto;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.speaker-notes-panel.visible { transform: translateX(-50%) translateY(0); }
+.notes-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.5em; padding-bottom: 0.4em;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.15);
+}
+.notes-label { font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan); }
+.notes-counter { opacity: 0.55; font-family: var(--font-display); letter-spacing: 0.08em; }
+.notes-body strong { color: var(--magenta); }
+.notes-body em { color: var(--cyan); font-style: italic; }
+.notes-body .tag {
+  display: inline-block;
+  background: rgba(255, 0, 170, 0.4); color: var(--text-primary);
+  padding: 0.1em 0.5em; border-radius: 4px;
+  font-size: 0.85em; font-weight: 700; letter-spacing: 0.08em; margin-right: 0.4em;
+}
+.notes-body .tag.cfu { background: rgba(255, 0, 170, 0.6); }
+.notes-body .tag.tt  { background: rgba(0, 224, 255, 0.6); }
+.notes-hint {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  left: 50%; transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--label-size);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  z-index: 199;
+  background: rgba(10, 15, 28, 0.85);
+  color: var(--text-muted);
+  padding: 0.3em 0.8em; border-radius: 999px;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  pointer-events: none; opacity: 0.7;
+}
+
+/* ===========================================
+   FRAGMENT REVEALS — for delayed in-slide reveals
+   =========================================== */
+[data-fragment] {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+[data-fragment].fragment-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ===========================================
+   TIMER SVG — used on the Finish Your Game slide
+   and as a small badge on the Your Turn slide
+   =========================================== */
+.timer-svg {
+  width: clamp(180px, 28vw, 360px);
+  height: auto;
+  color: var(--cyan);
+  filter: drop-shadow(0 0 24px rgba(0, 255, 204, 0.55));
+}
+.timer-svg .timer-hand-second {
+  transform-origin: 50px 55px;
+  animation: timer-spin 6s linear infinite;
+}
+@keyframes timer-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Small badge version for Slide 7 (Your Turn) — top-right corner */
+.timer-badge {
+  position: absolute;
+  top: clamp(0.8rem, 2vh, 1.5rem);
+  right: clamp(5rem, 8vw, 8rem);  /* clear of the slide counter */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.35em 0.85em 0.35em 0.45em;
+  background: rgba(0, 255, 204, 0.08);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 999px;
+  z-index: 50;
+  pointer-events: none;
+}
+.timer-badge .timer-svg {
+  width: clamp(20px, 2.6vw, 28px);
+  filter: none;
+}
+.timer-badge .timer-badge-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--small-size);
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+
+/* Debugging slide layout */
+.debug-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1fr;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+  margin-top: var(--gap-sm);
+}
+@media (max-width: 900px) { .debug-grid { grid-template-columns: 1fr; } }
+.debug-img-wrap {
+  display: flex; flex-direction: column; gap: var(--gap-sm);
+  align-items: center; justify-content: center;
+}
+.debug-img-wrap img {
+  max-width: 100%;
+  max-height: min(50vh, 360px);
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 0, 170, 0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+.debug-img-caption {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  color: var(--magenta);
+  text-align: center;
+  letter-spacing: 0.05em;
+  font-style: italic;
+}
+.debug-prompt-box {
+  background: rgba(0, 255, 204, 0.05);
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  border-radius: 12px;
+  padding: clamp(0.9rem, 1.8vw, 1.4rem);
+  display: flex; flex-direction: column; gap: 0.6em;
+  font-family: var(--font-display);
+}
+.debug-prompt-box .label {
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  margin-bottom: 0.2em;
+}
+.debug-prompt-box .race-line {
+  font-size: var(--body-size);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.debug-prompt-box .race-line strong.letter {
+  display: inline-block;
+  min-width: 1.5em;
+  font-weight: 800;
+}
+.debug-prompt-box .race-line .letter.r { color: var(--cyan); }
+.debug-prompt-box .race-line .letter.a { color: var(--magenta); }
+.debug-prompt-box .race-line .letter.c { color: var(--blue); }
+.debug-prompt-box .race-line .letter.e { color: var(--gold); }
+
+/* ============================================================
+   READABILITY OVERRIDES — slides 3 through 10
+   Body / description text was rendering in --text-dim (#3a4a6a)
+   which is barely legible on the dark navy background. Force
+   white for student-facing body content on these slides.
+   Headings on slides 5 + 6 vary across cyan/magenta/blue/gold
+   so the R/A/C/E labels pop and create visual rhythm.
+   ============================================================ */
+.slide[data-slide="3"]  .star-card .level-desc,
+.slide[data-slide="4"]  .card .body-text,
+.slide[data-slide="5"]  .vocab-def,
+.slide[data-slide="6"]  .race-card-q,
+.slide[data-slide="6"]  .race-card-eg,
+.slide[data-slide="7"]  .vocab-def,
+.slide[data-slide="8"]  .vocab-def,
+.slide[data-slide="9"]  .race-row-q,
+.slide[data-slide="10"] .body-text,
+.slide[data-slide="10"] .bullet-list li,
+.slide[data-slide="10"] .prompt-block {
+  color: var(--text-primary);
+}
+
+/* Slide 3 — vary star-card heading colours per tier */
+.slide[data-slide="3"] .star-card.s1 .level-label,
+.slide[data-slide="3"] .star-card.s1 .level-label .star-cyan { color: var(--cyan)    !important; }
+.slide[data-slide="3"] .star-card.s2 .level-label,
+.slide[data-slide="3"] .star-card.s2 .level-label .star-cyan { color: var(--gold)    !important; }
+.slide[data-slide="3"] .star-card.s3 .level-label,
+.slide[data-slide="3"] .star-card.s3 .level-label .star-cyan { color: var(--magenta) !important; }
+
+/* Slide 5 — vary R/A/C/E heading colours (recap card grid) */
+.slide[data-slide="5"] .vocab-grid > .vocab-item:nth-child(1) .vocab-term { color: var(--cyan)    !important; }
+.slide[data-slide="5"] .vocab-grid > .vocab-item:nth-child(2) .vocab-term { color: var(--magenta) !important; }
+.slide[data-slide="5"] .vocab-grid > .vocab-item:nth-child(3) .vocab-term { color: var(--blue)    !important; }
+.slide[data-slide="5"] .vocab-grid > .vocab-item:nth-child(4) .vocab-term { color: var(--gold)    !important; }
+
+/* Slide 6 — vary R/A/C/E card heading colours (full framework cards) */
+.slide[data-slide="6"] .race-card.r .race-card-letter,
+.slide[data-slide="6"] .race-card.r .race-card-word { color: var(--cyan); }
+.slide[data-slide="6"] .race-card.a .race-card-letter,
+.slide[data-slide="6"] .race-card.a .race-card-word { color: var(--magenta); }
+.slide[data-slide="6"] .race-card.c .race-card-letter,
+.slide[data-slide="6"] .race-card.c .race-card-word { color: var(--blue); }
+.slide[data-slide="6"] .race-card.e .race-card-letter,
+.slide[data-slide="6"] .race-card.e .race-card-word { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+
+<!-- Navigation dots — built by JS -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Slide counter -->
+<div class="slide-counter" id="slideCounter">1 / 11</div>
+
+<!-- Speaker notes panel — toggle with N key or triple-tap NEXT -->
+<aside class="speaker-notes-panel" id="speakerNotes" aria-label="Speaker notes (press N or triple-tap NEXT)">
+  <div class="notes-header">
+    <span class="notes-label">📝 Speaker Notes</span>
+    <span class="notes-counter" id="notesCounter">Slide 1 / 11</span>
+  </div>
+  <div class="notes-body" id="notesBody">(no notes for this slide)</div>
+</aside>
+<div class="notes-hint" id="notesHint">Press N or triple-tap → for speaker notes</div>
+
+<!-- Cursor effects canvas — glowing trail + click-and-drag ink -->
+<canvas id="cursorFx" aria-hidden="true"></canvas>
+
+<!-- Font size control — A− | 100% | A+ -->
+<div class="font-scale-ctrl" id="fontScaleCtrl" aria-label="Font size">
+  <button id="fontScaleDown" aria-label="Decrease font size" title="Smaller (⌘ ,)">A−</button>
+  <span id="fontScaleLabel">100%</span>
+  <button id="fontScaleUp"   aria-label="Increase font size" title="Larger (⌘ .)">A+</button>
+  <span class="ctrl-divider" aria-hidden="true"></span>
+  <button id="fullscreenBtn" class="fs-btn" aria-label="Enter fullscreen" title="Fullscreen (⌘ F)">⛶</button>
+</div>
+
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ============================================================
+       SLIDE 1: TITLE
+       ============================================================ -->
+  <section class="slide active" data-slide="1" aria-label="Title slide"
+    data-notes="<strong>Opener.</strong> Set the scene. <em>Lesson 4 of 4</em>. Today: finish your game then learn what <strong>debugging</strong> means. <span class='tag tt'>BR</span> Quick energiser: 'Hands up — who finished their superpower last lesson?'">
+    <div class="s1-orb"></div>
+    <div class="s1-ring"></div>
+    <div class="s1-bottom-bar"></div>
+
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">A.I. & Digital Literacy</span>
+
+      <h1 class="s1-title reveal d2">
+        Level Up<br>
+        <span class="glow-cyan">Your Game</span>
+      </h1>
+
+      <div class="accent-line reveal d3"></div>
+
+      <p class="slide-title reveal d4" style="color: var(--text-muted); font-size: var(--h3-size);">
+        RACE <span class="glow-magenta">Prompting</span>
+      </p>
+
+      <div class="s1-meta reveal d5">
+        <span class="s1-pill">Year 5 + 6</span>
+        <span class="s1-pill">Lesson 4 of 4</span>
+        <span class="s1-pill">30 Minutes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 2: WALT
+       ============================================================ -->
+  <section class="slide" data-slide="2" aria-label="Learning intentions"
+    data-notes="<strong>WALT.</strong> Read aloud. Today's three learning intentions are the same goal as last lesson plus an extension: design and build YOUR OWN feature. <span class='tag cfu'>CFU</span> 'Tell your partner which intention you think will be the trickiest today and why.' Take 1 voice.">
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">WALT</span>
+      <h2 class="slide-title reveal d2">What Are We Learning Today?</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <ul class="bullet-list">
+        <li class="reveal d3"><em><strong>Use</strong></em> the RACE framework to <em><strong>develop</strong></em> the final superpower feature for our Tetris game.</li>
+        <li class="reveal d4"><em><strong>Identify</strong></em> bugs in our generated code and <em><strong>examine</strong></em> what's going wrong.</li>
+        <li class="reveal d5"><em><strong>Develop</strong></em> a RACE prompt that fixes the bug and <em><strong>explain</strong></em> what "debugging" means.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 3: SUCCESS CRITERIA
+       ============================================================ -->
+  <section class="slide" data-slide="3" aria-label="Success criteria"
+    data-notes="<strong>Success Criteria.</strong> Three stars. <em>Going Further</em> is the new bar this lesson — students should be designing their own RACE prompts unaided. <span class='tag tt'>Turn and Talk</span> 'Which star are you aiming for today, and what would make you reach the next one?'">
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">Success Criteria</span>
+      <h2 class="slide-title reveal d2">How will you know you've succeeded?</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--gap-sm);">
+        <div class="star-card s1 reveal d3">
+          <span class="level-label"><span class="star-cyan">★</span> Getting Started</span>
+          <p class="level-desc">I can finish building my colour theme, add sound and add my super power.</p>
+        </div>
+        <div class="star-card s2 reveal d4">
+          <span class="level-label"><span class="star-cyan">★★</span> Levelling Up</span>
+          <p class="level-desc">I can <em>identify</em> a bug in my game and <em>describe</em> exactly what's not working.</p>
+        </div>
+        <div class="star-card s3 reveal d5">
+          <span class="level-label"><span class="star-cyan">★★★</span> Going Further</span>
+          <p class="level-desc">I can <em>develop</em> a RACE prompt to fix the bug and <em>explain</em> why structured RACE prompts make debugging faster.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 4: LAST LESSON RECAP
+       Two things from the Build Tetris with AI lesson:
+       (1) one-shot vs bad prompts   (2) built Tetris in Gemini
+       ============================================================ -->
+  <section class="slide" data-slide="4" aria-label="Last lesson recap"
+    data-notes="<strong>Recap with fragment reveals.</strong> Card 1 has TWO questions revealed by clicker presses. <span class='tag cfu'>CFU 1 (press NEXT once)</span> Cold call: 'Who can give me an example of a BAD prompt and why?' Wait 5-7s. Take 2 voices. <span class='tag cfu'>CFU 2 (press NEXT again)</span> Cold call: 'Now give me a GOOD prompt and tell me why it's good.' Look for detail, role, expectation.">
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">Recap</span>
+      <h2 class="slide-title reveal d2">What Did We Do Last Lesson?</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <div class="two-col" style="flex: 1; align-items: stretch; margin-top: var(--gap);">
+        <div class="card reveal d3">
+          <p class="eyebrow" style="margin-bottom: var(--gap-sm);">1. We built the game</p>
+          <div class="vocab-term" style="font-size: var(--h3-size); margin-bottom: var(--gap-sm); color: var(--cyan);">Tetris in Gemini with Mr Igor's one-shot prompt</div>
+          <p class="body-text">We pasted Mr Igor's one-shot prompt into <strong>Google Gemini AI Studio</strong> and watched the A.I. write the full Tetris game code in about <strong>5 minutes</strong>. Every superpower we've added since starts from that base game.</p>
+        </div>
+        <div class="card reveal d4">
+          <p class="eyebrow" style="margin-bottom: var(--gap-sm);">2. We made it our own</p>
+          <div class="vocab-term" style="font-size: var(--h3-size); margin-bottom: var(--gap-sm); color: var(--magenta);">RACE-prompted upgrades</div>
+          <p class="body-text">We used the <strong>RACE framework</strong> to make Mr Igor's game our own: changed the theme &amp; colours, added a sound effect, designed a unique <strong>superpower feature</strong>. <span style="color: var(--gold);">⚠ If you haven't finished yours yet, the first part of THIS lesson is to do exactly that.</span></p>
+        </div>
+      </div>
+
+      <p class="reveal d5" style="text-align: center; font-family: var(--font-display); font-size: var(--body-size); color: var(--text-dim); letter-spacing: 0.1em; margin-top: var(--gap);">
+        Today we <span style="color: var(--cyan);">finish the game</span>, then learn what <span style="color: var(--magenta);">debugging</span> means.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 5: DEBUGGING — new concept for Lesson 4
+       Mr Igor's game was broken; he wrote a RACE prompt to fix it.
+       ============================================================ -->
+  <section class="slide" data-slide="5" aria-label="Debugging"
+    data-notes="<strong>Debugging.</strong> Introduce a new word: DEBUGGING = finding and fixing problems in code. Tell the story: Mr Igor's hard-drop key froze the block instead of dropping it. Walk through the fix prompt R/A/C/E by R/A/C/E. <span class='tag cfu'>CFU</span> 'Which letter of RACE was most important here? Why?' Then: 'Has anyone hit a bug in YOUR game? What would your R/A/C/E look like?'">
+    <div class="slide-inner">
+      <div class="ped-badge i-do reveal d1">I Do</div>
+      <h2 class="slide-title reveal d2">What is <span style="color: var(--magenta);">Debugging</span>?</h2>
+      <div class="accent-line reveal d3"></div>
+      <p class="body-text reveal d3" style="color: var(--text-primary);">
+        <strong style="color: var(--magenta);">Debugging</strong> means finding and fixing problems in code. Every coder does it. The A.I. writes bugs too, and we use <strong>RACE prompts</strong> to fix them.
+      </p>
+
+      <div class="debug-grid">
+        <div class="debug-img-wrap reveal-scale d4">
+          <img src="assets/Tetris_debug.jpeg" alt="Mr Igor's broken Tetris — block frozen mid-fall after pressing Space">
+          <p class="debug-img-caption">Mr Igor's game was broken: pressing <strong>Space</strong> froze the block mid-fall instead of dropping it.</p>
+        </div>
+        <div class="debug-prompt-box reveal d5">
+          <span class="label">Mr Igor's fix prompt (RACE)</span>
+          <p class="race-line"><strong class="letter r">R:</strong> You are a game developer.</p>
+          <p class="race-line"><strong class="letter a">A:</strong> Fix the bug where pressing the Space bar makes the falling block freeze in place instead of dropping it to the bottom.</p>
+          <p class="race-line"><strong class="letter c">C:</strong> This is a React-based Tetris game where Space is supposed to be the <em>hard-drop</em> key, it should send the current block straight to the lowest possible position and lock it in.</p>
+          <p class="race-line"><strong class="letter e">E:</strong> When Space is pressed, the block drops instantly to the floor and locks. No more freezing.</p>
+        </div>
+      </div>
+
+      <p class="reveal d6" style="text-align: center; font-family: var(--font-display); font-size: var(--body-size); color: var(--gold); letter-spacing: 0.12em; margin-top: var(--gap); text-transform: uppercase;">
+        ...AND I was able to <strong style="color: var(--cyan);">fix it.</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 6: RACE FRAMEWORK RECAP (with fragment-reveal question)
+       Question shown by default, R/A/C/E breakdown reveals on next clicks
+       ============================================================ -->
+  <section class="slide" data-slide="6" aria-label="RACE framework recap"
+    data-notes="<strong>RACE recap.</strong> Question shows by default. <span class='tag cfu'>CFU</span> Cold call: 'Who can explain how the RACE framework works?' Wait 5-7s. Take 2 voices. THEN press NEXT four times to reveal R, A, C, E one by one — confirming or filling gaps in what students said. Each reveal: ask 'Did anyone mention this letter?' before showing it.">
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">Recap · Lesson 2</span>
+      <h2 class="slide-title reveal d2">The RACE Framework</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <div class="reveal d3" style="margin: var(--gap) 0; padding: var(--gap) var(--gap-lg, var(--gap)); background: rgba(255,0,170,0.08); border: 1px solid rgba(255,0,170,0.3); border-left: 4px solid var(--magenta); border-radius: 8px;">
+        <p style="font-family: var(--font-display); font-size: var(--h3-size); color: var(--text-primary); line-height: 1.4;">
+          🎯 <strong style="color: var(--magenta);">Question:</strong> Who can explain how the RACE framework works?
+        </p>
+      </div>
+
+      <div class="vocab-grid" style="margin-top: var(--gap-sm);">
+        <div class="vocab-item" data-fragment="1">
+          <div class="vocab-term" style="color: var(--cyan);">R · Role</div>
+          <div class="vocab-def">Who should the A.I. <strong>pretend to be</strong>? (e.g. game developer, sound designer)</div>
+        </div>
+        <div class="vocab-item" data-fragment="2">
+          <div class="vocab-term" style="color: var(--cyan);">A · Action</div>
+          <div class="vocab-def">What do you want the A.I. <strong>to DO</strong>? (e.g. add a sound, change colours)</div>
+        </div>
+        <div class="vocab-item" data-fragment="3">
+          <div class="vocab-term" style="color: var(--cyan);">C · Context</div>
+          <div class="vocab-def">What background info does the A.I. <strong>need to know</strong>? (e.g. browser Tetris, React)</div>
+        </div>
+        <div class="vocab-item" data-fragment="4">
+          <div class="vocab-term" style="color: var(--cyan);">E · Expectation</div>
+          <div class="vocab-def">What should the result <strong>look or sound like</strong>? (e.g. retro 8-bit chime, 0.3s)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 7: FINISH YOUR GAME — big timer SVG + 10–15 minute prompt
+       Replaces 5 previous slides (RACE framework, Demos 1+2,
+       Plan Your Prompt, Superpower example). This lesson is about
+       completion + debugging, not introducing new prompting concepts.
+       ============================================================ -->
+  <section class="slide" data-slide="7" aria-label="Finish your game"
+    data-notes="<strong>Finish Your Game (10-15 min).</strong> Students who haven't completed their superpower do it now. Students who finished last lesson — refine, add polish, or experiment. Teacher circulates with clipboard (TLAC #13 Show Call). <span class='tag tt'>BR</span> 'Tell your partner: which letter of RACE was hardest last time?'">
+    <div class="slide-inner">
+      <span class="ped-badge you-do reveal d1">You Do</span>
+      <h2 class="slide-title reveal d2">Finish Your Game</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <div class="two-col" style="flex: 1; align-items: center; margin-top: var(--gap);">
+        <div class="reveal-scale d3" style="display: flex; justify-content: center; align-items: center;">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg" aria-hidden="true">
+            <!-- Top stem button -->
+            <rect x="44" y="6" width="12" height="6" rx="1.5" fill="currentColor"/>
+            <line x1="50" y1="12" x2="50" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <!-- Side buttons -->
+            <rect x="18" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(-30 21 24)"/>
+            <rect x="76" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(30 79 24)"/>
+            <!-- Clock face -->
+            <circle cx="50" cy="55" r="34" fill="rgba(0,255,204,0.04)" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="50" cy="55" r="30" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <!-- Tick marks -->
+            <line x1="50" y1="25" x2="50" y2="30" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="80" y1="55" x2="75" y2="55" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="50" y1="85" x2="50" y2="80" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="20" y1="55" x2="25" y2="55" stroke="currentColor" stroke-width="2.5"/>
+            <!-- 5-min marks -->
+            <line x1="65" y1="29.5" x2="63" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="76.5" y1="40" x2="72.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="76.5" y1="70" x2="72.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="65" y1="80.5" x2="63" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="35" y1="80.5" x2="37" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="23.5" y1="70" x2="27.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="23.5" y1="40" x2="27.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="35" y1="29.5" x2="37" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
+            <!-- Minute hand (static, pointing at 12 o'clock) -->
+            <line x1="50" y1="55" x2="50" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Second hand (spinning) -->
+            <line x1="50" y1="55" x2="72" y2="55" stroke="var(--magenta)" stroke-width="1.8" stroke-linecap="round" class="timer-hand-second"/>
+            <circle cx="50" cy="55" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="reveal d4" style="display: flex; flex-direction: column; gap: var(--gap-sm); justify-content: center;">
+          <p style="font-family: var(--font-display); font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 800; color: var(--cyan); line-height: 1; letter-spacing: -0.02em;">10–15<br><span style="font-size: 0.55em; color: var(--text-primary); letter-spacing: 0.2em; text-transform: uppercase;">minutes</span></p>
+          <p class="body-text" style="color: var(--text-primary); font-size: var(--h3-size); line-height: 1.4;">
+            to <strong style="color: var(--cyan);">finish your game</strong>.
+          </p>
+          <p class="body-text" style="color: var(--text-primary);">
+            Use your <strong>RACE prompts</strong> to add the last feature. Make sure it WORKS before time runs out.
+          </p>
+          <p style="font-family: var(--font-display); font-size: var(--small-size); color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; margin-top: var(--gap-sm);">
+            Hand up if you get stuck.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 8: YOUR TURN (YOU DO) — finish + debug, big timer + RACE-fix tip
+       ============================================================ -->
+  <section class="slide" data-slide="8" aria-label="Your turn"
+    data-notes="<strong>You Do — finish AND debug.</strong> Students continue the same colour/sound/super-power task they began last lesson. If something breaks, they apply the Debugging concept from earlier and write a RACE fix prompt. Teacher circulates with clipboard (TLAC #13 Show Call). <span class='tag tt'>BR</span> Pair-check at 5-min mark: 'Show your partner what works and what doesn't.'">
+    <div class="slide-inner">
+      <div class="ped-badge you-do reveal d1">You Do</div>
+      <h2 class="slide-title reveal d2">Your Turn</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <!-- TOP: big stopwatch + 10-15 minutes label — same SVG as Slide 6 -->
+      <div class="two-col" style="align-items: center; margin-top: var(--gap-sm);">
+        <div class="reveal-scale d3" style="display: flex; justify-content: center; align-items: center;">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg" aria-hidden="true">
+            <rect x="44" y="6" width="12" height="6" rx="1.5" fill="currentColor"/>
+            <line x1="50" y1="12" x2="50" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <rect x="18" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(-30 21 24)"/>
+            <rect x="76" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(30 79 24)"/>
+            <circle cx="50" cy="55" r="34" fill="rgba(0,255,204,0.04)" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="50" cy="55" r="30" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="50" y1="25" x2="50" y2="30" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="80" y1="55" x2="75" y2="55" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="50" y1="85" x2="50" y2="80" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="20" y1="55" x2="25" y2="55" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="65" y1="29.5" x2="63" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="76.5" y1="40" x2="72.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="76.5" y1="70" x2="72.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="65" y1="80.5" x2="63" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="35" y1="80.5" x2="37" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="23.5" y1="70" x2="27.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="23.5" y1="40" x2="27.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="35" y1="29.5" x2="37" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="50" y1="55" x2="50" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="55" x2="72" y2="55" stroke="var(--magenta)" stroke-width="1.8" stroke-linecap="round" class="timer-hand-second"/>
+            <circle cx="50" cy="55" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="reveal d4" style="display: flex; flex-direction: column; gap: var(--gap-sm); justify-content: center;">
+          <p style="font-family: var(--font-display); font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 800; color: var(--cyan); line-height: 1; letter-spacing: -0.02em;">10–15<br><span style="font-size: 0.55em; color: var(--text-primary); letter-spacing: 0.2em; text-transform: uppercase;">minutes</span></p>
+          <p class="body-text" style="color: var(--text-primary); font-size: var(--h3-size); line-height: 1.4;">
+            to <strong style="color: var(--cyan);">finish</strong> AND <strong style="color: var(--magenta);">debug</strong> your game.
+          </p>
+        </div>
+      </div>
+
+      <!-- BOTTOM: condensed task reminders + debug tip -->
+      <div class="task-grid" style="margin-top: var(--gap-sm);">
+        <div class="task-card t1 reveal d5">
+          <span class="task-level">★ Colour Theme</span>
+          <p class="task-desc">Change your Tetris block colours.</p>
+        </div>
+        <div class="task-card t2 reveal d5">
+          <span class="task-level">★★ Sound Effect</span>
+          <p class="task-desc">Add a sound when a row clears.</p>
+        </div>
+        <div class="task-card t3 reveal d5">
+          <span class="task-level">★★★ Super Power</span>
+          <p class="task-desc">Bomb block every 5 rows cleared.</p>
+        </div>
+      </div>
+
+      <p class="reveal d6" style="text-align: center; font-family: var(--font-display); font-size: var(--small-size); color: var(--gold); letter-spacing: 0.12em; margin-top: var(--gap-sm); text-transform: uppercase;">
+        🛠 Bug? Write a <strong style="color: var(--magenta);">RACE fix prompt</strong> — just like Mr Igor did.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 9: EXIT TICKET
+       ============================================================ -->
+  <section class="slide" data-slide="9" aria-label="Exit ticket"
+    data-notes="<strong>Exit Ticket (~7 min total).</strong> Two timed share steps. <strong>Step 1 (2 min):</strong> students show their game to a partner. Walk around, look for unfinished work or bugs. Press NEXT to reveal Step 2. <strong>Step 2 (5 min):</strong> 4-5 volunteers show the whole class on the projector. <span class='tag tt'>BR</span> 'When you watch a friend's game, name ONE thing that works and ONE thing you'd RACE-prompt to improve.'">
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">Exit Ticket</span>
+      <h2 class="slide-title reveal d2">Show Your Game</h2>
+      <div class="accent-line reveal d3"></div>
+
+      <div class="two-col" style="align-items: stretch; margin-top: var(--gap-sm); flex: 1;">
+        <!-- STEP 1: Show your friend (visible by default) -->
+        <div class="card reveal d3" style="border-color: rgba(0,255,204,0.4); display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--gap-sm); padding: clamp(1rem, 2vw, 1.6rem);">
+          <span class="eyebrow" style="color: var(--cyan); font-size: var(--small-size);">Step 1</span>
+          <p style="font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; line-height: 1.2; color: var(--text-primary);">
+            Show your <span style="color: var(--cyan);">friend</span><br>your Tetris game.
+          </p>
+          <div style="display: flex; justify-content: center; align-items: center; flex: 1; max-height: 35vh;">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg" aria-hidden="true" style="color: var(--cyan); width: clamp(120px, 22vh, 220px); height: clamp(120px, 22vh, 220px);">
+              <rect x="44" y="6" width="12" height="6" rx="1.5" fill="currentColor"/>
+              <line x1="50" y1="12" x2="50" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <rect x="18" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(-30 21 24)"/>
+              <rect x="76" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(30 79 24)"/>
+              <circle cx="50" cy="55" r="34" fill="rgba(0,255,204,0.04)" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="50" cy="55" r="30" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+              <line x1="50" y1="25" x2="50" y2="30" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="80" y1="55" x2="75" y2="55" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="50" y1="85" x2="50" y2="80" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="20" y1="55" x2="25" y2="55" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="50" y1="55" x2="50" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="50" y1="55" x2="72" y2="55" stroke="var(--magenta)" stroke-width="1.8" stroke-linecap="round" class="timer-hand-second"/>
+              <circle cx="50" cy="55" r="2.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <p style="font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--cyan); line-height: 1;">
+            2<span style="font-size: 0.45em; color: var(--text-primary); letter-spacing: 0.2em; margin-left: 0.3em; text-transform: uppercase;">minutes</span>
+          </p>
+        </div>
+
+        <!-- STEP 2: Show the whole class (revealed via fragment / NEXT click) -->
+        <div class="card" data-fragment="1" style="border-color: rgba(255,0,170,0.4); display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--gap-sm); padding: clamp(1rem, 2vw, 1.6rem);">
+          <span class="eyebrow" style="color: var(--magenta); font-size: var(--small-size);">Step 2</span>
+          <p style="font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; line-height: 1.2; color: var(--text-primary);">
+            Show the <span style="color: var(--magenta);">whole class</span><br>your Tetris game.
+          </p>
+          <div style="display: flex; justify-content: center; align-items: center; flex: 1; max-height: 35vh;">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg" aria-hidden="true" style="color: var(--magenta); width: clamp(120px, 22vh, 220px); height: clamp(120px, 22vh, 220px);">
+              <rect x="44" y="6" width="12" height="6" rx="1.5" fill="currentColor"/>
+              <line x1="50" y1="12" x2="50" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <rect x="18" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(-30 21 24)"/>
+              <rect x="76" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(30 79 24)"/>
+              <circle cx="50" cy="55" r="34" fill="rgba(255,0,170,0.04)" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="50" cy="55" r="30" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+              <line x1="50" y1="25" x2="50" y2="30" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="80" y1="55" x2="75" y2="55" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="50" y1="85" x2="50" y2="80" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="20" y1="55" x2="25" y2="55" stroke="currentColor" stroke-width="2.5"/>
+              <line x1="50" y1="55" x2="50" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="50" y1="55" x2="72" y2="55" stroke="var(--cyan)" stroke-width="1.8" stroke-linecap="round" class="timer-hand-second"/>
+              <circle cx="50" cy="55" r="2.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <p style="font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--magenta); line-height: 1;">
+            5<span style="font-size: 0.45em; color: var(--text-primary); letter-spacing: 0.2em; margin-left: 0.3em; text-transform: uppercase;">minutes</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 10: MISSION COMPLETE
+       ============================================================ -->
+  <section class="slide" data-slide="10" aria-label="Mission complete"
+    data-notes="<strong>Closing.</strong> Celebrate. They've built, modified, finished AND debugged their own AI-generated game across 4 lessons. Name the unit-level skill: prompting + debugging together is how real developers ship code with A.I.">
+    <div class="s1-orb" style="background: radial-gradient(circle, rgba(255,0,170,0.07) 0%, transparent 70%);"></div>
+    <div class="s1-ring" style="border-color: rgba(255,0,170,0.15);"></div>
+    <div class="s1-bottom-bar"></div>
+
+    <div class="slide-inner">
+      <span class="eyebrow reveal d1">Unit Complete</span>
+      <h1 class="s1-title reveal d2">
+        Mission<br>
+        <span class="glow-magenta">Complete!</span>
+      </h1>
+      <div class="accent-line reveal d3" style="background: var(--magenta); box-shadow: 0 0 10px var(--magenta);"></div>
+
+      <p class="body-text reveal d3">Across 4 lessons you built a Tetris game with A.I., levelled it up with RACE prompting, finished it, and learned to <strong style="color: var(--magenta);">debug</strong> bugs the same way a real developer would.</p>
+
+      <div class="mission-stars reveal d4">
+        <div class="mission-item"><span class="stars star-cyan">★</span><span>Game finished &amp; playable</span></div>
+        <div class="mission-item"><span class="stars star-cyan">★★</span><span>Understood debugging</span></div>
+        <div class="mission-item"><span class="stars star-cyan">★★★</span><span>Wrote a RACE fix prompt</span></div>
+      </div>
+
+      <p class="reveal d5" style="font-family: var(--font-display); font-size: var(--body-size); color: var(--gold); letter-spacing: 0.15em; margin-top: var(--gap);">Keep levelling up! 🚀</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 11: IMAGE CREDITS
+       ============================================================ -->
+  <section class="slide" data-slide="11" aria-label="Image credits"
+    data-notes="<strong>Credits.</strong> Acknowledge image sources. Optional to show, usually skipped during live presenting.">
+    <div class="slide-inner" style="justify-content: flex-end; padding-bottom: clamp(3rem, 8vh, 6rem);">
+      <span class="eyebrow reveal d1">Image Credits</span>
+      <div class="accent-line reveal d2"></div>
+      <div class="credits-list reveal d3">
+        <p class="credit-line">Slide 5: Mr Igor's broken Tetris game (Space-bar bug) — screenshot from Google Gemini Canvas.</p>
+        <p class="credit-line" style="margin-top: var(--gap);">Google Gemini is a registered trademark of Google LLC. Tetris is a registered trademark of The Tetris Company.</p>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /slides-container -->
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles all navigation: keyboard, clicker,
+   mouse wheel, touch/swipe, and nav dots.
+   =========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides        = Array.from(document.querySelectorAll('.slide'));
+    this.total         = this.slides.length;
+    this.current       = 0;
+    this.isAnimating   = false;
+    this.ANIM_DURATION = 500; // ms — matches CSS transition duration
+
+    this.progressFill  = document.getElementById('progressFill');
+    this.slideCounter  = document.getElementById('slideCounter');
+    this.navDotsEl     = document.getElementById('navDots');
+
+    this.buildNavDots();
+    this.setupKeyboard();
+    this.setupWheel();
+    this.setupTouch();
+    this.updateUI();
+  }
+
+  /* ---- Core navigation ---- */
+  goTo(index) {
+    if (index < 0 || index >= this.total) return;
+    if (this.isAnimating) return;
+    if (index === this.current) return;
+
+    this.isAnimating = true;
+
+    /* Reset fragments on the slide we're leaving AND the slide we're entering */
+    this.slides[this.current].querySelectorAll('[data-fragment]').forEach(f => f.classList.remove('fragment-visible'));
+
+    // Exit current slide to the left
+    this.slides[this.current].classList.remove('active');
+    this.slides[this.current].classList.add('exit-left');
+
+    // Remove exit-left after animation so it resets cleanly
+    const exiting = this.slides[this.current];
+    setTimeout(() => {
+      exiting.classList.remove('exit-left');
+    }, this.ANIM_DURATION);
+
+    this.current = index;
+
+    // Reset fragments on the destination slide too
+    this.slides[this.current].querySelectorAll('[data-fragment]').forEach(f => f.classList.remove('fragment-visible'));
+
+    // Enter new slide
+    this.slides[this.current].classList.add('active');
+
+    setTimeout(() => {
+      this.isAnimating = false;
+    }, this.ANIM_DURATION);
+
+    this.updateUI();
+  }
+
+  /* Get sorted fragments on the current slide */
+  getFragments() {
+    return Array.from(this.slides[this.current].querySelectorAll('[data-fragment]'))
+      .sort((a, b) => parseInt(a.dataset.fragment, 10) - parseInt(b.dataset.fragment, 10));
+  }
+
+  next() {
+    /* Reveal next un-shown fragment first; advance only when no fragments left */
+    const frags = this.getFragments();
+    for (const f of frags) {
+      if (!f.classList.contains('fragment-visible')) {
+        f.classList.add('fragment-visible');
+        return;
+      }
+    }
+    this.goTo(this.current + 1);
+  }
+
+  prev() {
+    /* Hide last shown fragment first; go back only when none are visible */
+    const frags = this.getFragments();
+    for (let i = frags.length - 1; i >= 0; i--) {
+      if (frags[i].classList.contains('fragment-visible')) {
+        frags[i].classList.remove('fragment-visible');
+        return;
+      }
+    }
+    this.goTo(this.current - 1);
+  }
+
+  /* ---- Keyboard + Clicker support ----
+     Debounced 200ms triple-tap on NEXT key → toggle speaker notes.
+     Single tap → advance (with fragment walk via next()).
+     Universal across all clickers (only relies on the standard "next" signal).
+  ---- */
+  setupKeyboard() {
+    const NEXT = ['ArrowRight', 'ArrowDown', 'Space', 'PageDown'];
+    const PREV = ['ArrowLeft', 'ArrowUp', 'PageUp'];
+
+    this.TAP_DEBOUNCE_MS = 200;
+    this.tapCount = 0;
+    this.tapTimer = null;
+    const flushTaps = () => {
+      const count = this.tapCount;
+      this.tapCount = 0;
+      this.tapTimer = null;
+      if (count >= 3) {
+        if (typeof this.onTripleTap === 'function') this.onTripleTap();
+      } else {
+        for (let i = 0; i < count; i++) this.next();
+      }
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.isContentEditable || ['INPUT','TEXTAREA','IFRAME'].includes(e.target.tagName)) return;
+      if (NEXT.includes(e.code)) {
+        e.preventDefault();
+        if (e.repeat) return;
+        this.tapCount += 1;
+        if (this.tapTimer) clearTimeout(this.tapTimer);
+        this.tapTimer = setTimeout(flushTaps, this.TAP_DEBOUNCE_MS);
+        return;
+      }
+      if (PREV.includes(e.code)) { e.preventDefault(); this.prev(); }
+    });
+  }
+
+  /* ---- Mouse wheel — one tick = one slide ---- */
+  setupWheel() {
+    let wheelLock = false;
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelLock = true;
+      if (e.deltaY > 0) this.next();
+      else              this.prev();
+      setTimeout(() => { wheelLock = false; }, this.ANIM_DURATION + 100);
+    }, { passive: false });
+  }
+
+  /* ---- Touch / swipe (horizontal OR vertical) ---- */
+  setupTouch() {
+    let startX = 0, startY = 0;
+    document.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const dX = startX - e.changedTouches[0].clientX;
+      const dY = startY - e.changedTouches[0].clientY;
+      const THRESHOLD = 50;
+      if (Math.abs(dX) > Math.abs(dY)) {
+        if (dX >  THRESHOLD) this.next();
+        if (dX < -THRESHOLD) this.prev();
+      } else {
+        if (dY >  THRESHOLD) this.next();
+        if (dY < -THRESHOLD) this.prev();
+      }
+    }, { passive: true });
+  }
+
+  /* ---- Navigation dots ---- */
+  buildNavDots() {
+    this.navDotsEl.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsEl.appendChild(btn);
+    });
+  }
+
+  /* ---- Update all UI elements ---- */
+  updateUI() {
+    /* Progress bar */
+    const pct = ((this.current + 1) / this.total) * 100;
+    this.progressFill.style.width = pct + '%';
+
+    /* Slide counter */
+    this.slideCounter.textContent = `${this.current + 1} / ${this.total}`;
+
+    /* Nav dots */
+    this.navDotsEl.querySelectorAll('button').forEach((btn, i) => {
+      btn.classList.toggle('active', i === this.current);
+    });
+
+    /* Update page title with slide info for accessibility */
+    document.title = `Slide ${this.current + 1} of ${this.total} — RACE Prompting (Year 5)`;
+  }
+}
+
+/* ===========================================
+   FONT SCALE CONTROLLER
+   Buttons + ⌘. (bigger) / ⌘, (smaller)
+   Range: 50% → 200% in 10% steps.
+   Persists choice in localStorage.
+   =========================================== */
+class FontScaleController {
+  constructor() {
+    this.STEP  = 0.1;
+    this.MIN   = 0.5;
+    this.MAX   = 2.0;
+    this.scale = parseFloat(localStorage.getItem('race_fontScale') || '1');
+
+    this.labelEl = document.getElementById('fontScaleLabel');
+    this.btnUp   = document.getElementById('fontScaleUp');
+    this.btnDown = document.getElementById('fontScaleDown');
+
+    this.btnUp.addEventListener('click',   () => this.increase());
+    this.btnDown.addEventListener('click', () => this.decrease());
+
+    /* Keyboard shortcuts: ⌘. = bigger, ⌘, = smaller */
+    document.addEventListener('keydown', (e) => {
+      if (!e.metaKey) return;
+      if (e.key === '.') { e.preventDefault(); this.increase(); }
+      if (e.key === ',') { e.preventDefault(); this.decrease(); }
+    });
+
+    this.apply(); /* restore saved scale immediately */
+  }
+
+  increase() { this.setScale(this.scale + this.STEP); }
+  decrease() { this.setScale(this.scale - this.STEP); }
+
+  setScale(val) {
+    /* Round to 1 decimal place to avoid floating-point drift */
+    this.scale = Math.round(Math.max(this.MIN, Math.min(this.MAX, val)) * 10) / 10;
+    this.apply();
+    localStorage.setItem('race_fontScale', this.scale);
+  }
+
+  apply() {
+    document.documentElement.style.setProperty('--font-scale', this.scale);
+    this.labelEl.textContent = Math.round(this.scale * 100) + '%';
+    /* Grey out buttons at limits */
+    this.btnDown.disabled = this.scale <= this.MIN;
+    this.btnUp.disabled   = this.scale >= this.MAX;
+  }
+}
+
+/* ===========================================
+   FULLSCREEN CONTROLLER
+   Button + ⌘F (also plain F when no input is focused).
+   Uses the Fullscreen API so browser chrome hides
+   completely — behaves like PPTX Presenter View.
+   Escape exits automatically (browser default).
+   =========================================== */
+class FullscreenController {
+  constructor() {
+    this.btn = document.getElementById('fullscreenBtn');
+    this.btn.addEventListener('click', () => this.toggle());
+
+    /* ⌘F — override the browser's Find shortcut so we can go fullscreen */
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey && (e.key === 'f' || e.key === 'F')) {
+        e.preventDefault();
+        this.toggle();
+        return;
+      }
+      /* Plain F key — only if the user isn't typing in an input/textarea/contenteditable */
+      if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const t = e.target;
+        const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+        if (!typing) { e.preventDefault(); this.toggle(); }
+      }
+    });
+
+    /* Keep button label in sync with state (Escape exit, etc.) */
+    document.addEventListener('fullscreenchange', () => this.syncLabel());
+  }
+
+  toggle() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  }
+
+  syncLabel() {
+    const isFs = !!document.fullscreenElement;
+    this.btn.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+    this.btn.setAttribute('title',      isFs ? 'Exit fullscreen (⌘ F / Esc)' : 'Fullscreen (⌘ F)');
+    this.btn.textContent = isFs ? '⛶' : '⛶';
+  }
+}
+
+/* ===========================================
+   CURSOR EFFECTS
+   Two always-on behaviours on one canvas:
+   (1) Glowing cyan trail follows the cursor and fades (~400ms).
+   (2) Click-and-drag draws a glowing ink line that fades
+       after release (~1.5s) — like Google Slides presenter mode.
+   Skipped on touch devices and when prefers-reduced-motion is set.
+   Clicks on buttons/links/inputs DON'T start a stroke so nav
+   dots and controls work normally.
+   =========================================== */
+class CursorEffects {
+  constructor() {
+    this.canDo =
+      matchMedia('(hover: hover) and (pointer: fine)').matches &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!this.canDo) return;
+
+    this.canvas = document.getElementById('cursorFx');
+    this.ctx    = this.canvas.getContext('2d');
+
+    this.trail   = [];    /* {x,y,t} — trail dots, ~400ms life */
+    this.strokes = [];    /* [{points:[{x,y}], done, finishedAt}] */
+    this.current = null;  /* active stroke while mouse is down */
+    this.TRAIL_LIFE = 400;   /* ms */
+    this.INK_FADE   = 1500;  /* ms after mouseup */
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.bindEvents();
+    requestAnimationFrame(() => this.tick());
+  }
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width  = innerWidth  * dpr;
+    this.canvas.height = innerHeight * dpr;
+    this.canvas.style.width  = innerWidth  + 'px';
+    this.canvas.style.height = innerHeight + 'px';
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+  }
+
+  bindEvents() {
+    window.addEventListener('mousemove', (e) => {
+      this.trail.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (this.current) this.current.points.push({ x: e.clientX, y: e.clientY });
+    });
+
+    window.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      /* Don't draw ink when the user is clicking an interactive element */
+      if (e.target.closest('button, a, [contenteditable], input, textarea, .nav-dots')) return;
+      this.current = { points: [{ x: e.clientX, y: e.clientY }], done: false };
+      this.strokes.push(this.current);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (this.current) {
+        this.current.done = true;
+        this.current.finishedAt = performance.now();
+        this.current = null;
+      }
+    });
+
+    /* If the mouse leaves the window mid-drag, close the stroke cleanly */
+    window.addEventListener('mouseleave', () => {
+      if (this.current) {
+        this.current.done = true;
+        this.current.finishedAt = performance.now();
+        this.current = null;
+      }
+    });
+  }
+
+  tick() {
+    const now = performance.now();
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+    /* === Cursor trail: soft cyan glow dots === */
+    this.trail = this.trail.filter(p => now - p.t < this.TRAIL_LIFE);
+    for (const p of this.trail) {
+      const age = (now - p.t) / this.TRAIL_LIFE;
+      const alpha = 1 - age;
+      const r = 7 * (1 - age * 0.35);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 255, 204, ${alpha * 0.55})`;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = 'rgba(0, 255, 204, 0.9)';
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    /* === Ink strokes: solid while drawing, fade after release === */
+    for (let i = this.strokes.length - 1; i >= 0; i--) {
+      const s = this.strokes[i];
+      let alpha = 1;
+      if (s.done) {
+        const age = now - s.finishedAt;
+        if (age >= this.INK_FADE) { this.strokes.splice(i, 1); continue; }
+        alpha = 1 - age / this.INK_FADE;
+      }
+      if (s.points.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x, s.points[0].y);
+      for (let j = 1; j < s.points.length; j++) {
+        ctx.lineTo(s.points[j].x, s.points[j].y);
+      }
+      ctx.strokeStyle = `rgba(0, 255, 204, ${alpha})`;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = `rgba(0, 255, 204, ${alpha})`;
+      ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+
+    requestAnimationFrame(() => this.tick());
+  }
+}
+
+/* ============================================================
+   SPEAKER NOTES PANEL
+   N key + triple-tap NEXT to toggle. Reads `data-notes` HTML
+   from each slide and re-renders when slide changes.
+   ============================================================ */
+class SpeakerNotesPanel {
+  constructor(presentation) {
+    this.presentation = presentation;
+    this.visible = false;
+    this.panel = document.getElementById('speakerNotes');
+    this.hint  = document.getElementById('notesHint');
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'n' || e.key === 'N') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.target.isContentEditable || ['INPUT','TEXTAREA','IFRAME'].includes(e.target.tagName)) return;
+        e.preventDefault();
+        this.toggle();
+      }
+    });
+    /* Re-render notes whenever slide changes */
+    const orig = presentation.updateUI.bind(presentation);
+    presentation.updateUI = () => { orig(); this.updateContent(); };
+    this.updateContent();
+  }
+  toggle() {
+    this.visible = !this.visible;
+    this.panel.classList.toggle('visible', this.visible);
+    this.hint.style.display = this.visible ? 'none' : '';
+    this.updateContent();
+  }
+  updateContent() {
+    const slide = this.presentation.slides[this.presentation.current];
+    const notes = slide.dataset.notes || '(no notes for this slide)';
+    this.panel.querySelector('.notes-body').innerHTML = notes;
+    this.panel.querySelector('.notes-counter').textContent = `Slide ${this.presentation.current + 1} / ${this.presentation.total}`;
+  }
+}
+
+/* Boot */
+const fontScaleCtrl  = new FontScaleController();
+const fullscreenCtrl = new FullscreenController();
+const cursorFx       = new CursorEffects();
+const presentation   = new SlidePresentation();
+const speakerNotes   = new SpeakerNotesPanel(presentation);
+presentation.onTripleTap = () => speakerNotes.toggle();
+</script>
+
+</body>
+</html>
