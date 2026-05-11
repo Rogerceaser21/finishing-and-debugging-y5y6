@@ -1039,6 +1039,229 @@ html, body {
    Headings on slides 5 + 6 vary across cyan/magenta/blue/gold
    so the R/A/C/E labels pop and create visual rhythm.
    ============================================================ */
+
+/* Slide 2 (WALT): bump bullet text up so students can read it from the back of the room */
+.slide[data-slide="2"] .bullet-list li {
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  line-height: 1.45;
+  padding-left: 1.4em;
+}
+.slide[data-slide="2"] .bullet-list { gap: clamp(0.8rem, 1.8vh, 1.5rem); }
+.slide[data-slide="2"] .bullet-list li::before {
+  font-size: 1.2em;
+  top: -0.05em;
+}
+
+/* ===========================================
+   SLIDE 8 — CRAM LAYOUT
+   3 task cards (with full R/A/C/E) + timer + full debugging content all on ONE viewport.
+   Tight padding + small font tokens so nothing overflows.
+   =========================================== */
+.cram-slide .slide-inner {
+  padding: clamp(0.8rem, 2vh, 1.4rem) clamp(1rem, 2.5vw, 2rem);
+  display: flex;
+  flex-direction: column;
+}
+.cram-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+}
+.cram-header-left { flex: 1; min-width: 0; }
+.cram-header-left .slide-title {
+  font-size: clamp(1.6rem, 3.8vw, 2.6rem);
+  line-height: 1;
+}
+.cram-header-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1vw, 0.8rem);
+  flex-shrink: 0;
+}
+.cram-timer-svg {
+  width: clamp(50px, 8vh, 80px);
+  height: clamp(50px, 8vh, 80px);
+}
+.cram-timer-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.cram-timer-num {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: -0.02em;
+}
+.cram-timer-unit {
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+  color: var(--text-primary);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.cram-timer-tag {
+  font-family: var(--font-display);
+  font-size: clamp(0.55rem, 0.85vw, 0.75rem);
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.2em;
+}
+
+.cram-body {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+  flex: 1;
+  min-height: 0;
+}
+
+/* LEFT — 3 task cards stacked */
+.cram-task-col {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 0.8vh, 0.6rem);
+  min-height: 0;
+}
+.cram-task-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: clamp(0.4rem, 0.9vw, 0.7rem) clamp(0.55rem, 1.1vw, 0.9rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-height: 0;
+}
+.cram-task-card.t1 { border-color: rgba(0,255,204,0.45); }
+.cram-task-card.t2 { border-color: rgba(68,136,255,0.45); }
+.cram-task-card.t3 { border-color: rgba(255,0,170,0.45); }
+.cram-task-card.t1 .task-level { color: var(--cyan); }
+.cram-task-card.t2 .task-level { color: var(--blue); }
+.cram-task-card.t3 .task-level { color: var(--magenta); }
+.cram-task-card .task-level {
+  font-family: var(--font-display);
+  font-size: clamp(0.78rem, 1.25vw, 1rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+.cram-task-desc {
+  font-size: clamp(0.6rem, 0.95vw, 0.78rem);
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+.cram-task-race {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 clamp(0.4rem, 0.8vw, 0.7rem);
+  margin-top: auto;
+}
+.cram-task-race span {
+  font-size: clamp(0.55rem, 0.85vw, 0.72rem);
+  color: #ffffff;
+  line-height: 1.25;
+}
+.cram-task-race span strong { color: var(--cyan); }
+.cram-task-card.t2 .cram-task-race span strong { color: var(--blue); }
+.cram-task-card.t3 .cram-task-race span strong { color: var(--magenta); }
+
+/* RIGHT — debugging content */
+.cram-debug-col {
+  background: rgba(255, 0, 170, 0.04);
+  border: 1px solid rgba(255, 0, 170, 0.3);
+  border-radius: 7px;
+  padding: clamp(0.4rem, 0.9vw, 0.75rem) clamp(0.55rem, 1.1vw, 0.95rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.2rem, 0.5vh, 0.4rem);
+  min-height: 0;
+  overflow: hidden;
+}
+.cram-debug-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.7vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--text-primary);
+}
+.cram-debug-def {
+  font-size: clamp(0.6rem, 0.95vw, 0.78rem);
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin: 0;
+}
+.cram-debug-img {
+  display: flex;
+  justify-content: center;
+  max-height: clamp(70px, 14vh, 130px);
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 0, 170, 0.25);
+}
+.cram-debug-img img {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.cram-debug-caption {
+  font-size: clamp(0.55rem, 0.85vw, 0.7rem);
+  color: var(--magenta);
+  text-align: center;
+  line-height: 1.2;
+  margin: 0;
+  font-style: italic;
+}
+.cram-debug-prompt {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 2px solid var(--magenta);
+  padding: clamp(0.3rem, 0.7vw, 0.5rem) clamp(0.4rem, 0.9vw, 0.65rem);
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.cram-debug-prompt-label {
+  font-family: var(--font-display);
+  font-size: clamp(0.55rem, 0.85vw, 0.7rem);
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+.cram-race-line {
+  font-size: clamp(0.58rem, 0.9vw, 0.74rem);
+  line-height: 1.3;
+  margin: 0;
+  color: var(--text-primary);
+}
+.cram-letter { display: inline-block; min-width: 1.1em; }
+.cram-letter.r { color: var(--cyan); }
+.cram-letter.a { color: var(--magenta); }
+.cram-letter.c { color: var(--blue); }
+.cram-letter.e { color: var(--gold); }
+.cram-debug-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(0.6rem, 0.95vw, 0.78rem);
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+}
+
+/* Mobile / very short viewports — task RACE bullets become 1-column */
+@media (max-height: 600px), (max-width: 900px) {
+  .cram-task-race { grid-template-columns: 1fr; }
+  .cram-debug-img { max-height: clamp(50px, 10vh, 90px); }
+}
+
 .slide[data-slide="3"]  .star-card .level-desc,
 .slide[data-slide="4"]  .card .body-text,
 .slide[data-slide="5"]  .vocab-def,
@@ -1357,66 +1580,105 @@ html, body {
   <!-- ============================================================
        SLIDE 8: YOUR TURN (YOU DO) — finish + debug, big timer + RACE-fix tip
        ============================================================ -->
-  <section class="slide" data-slide="8" aria-label="Your turn"
-    data-notes="<strong>You Do — finish AND debug.</strong> Students continue the same colour/sound/super-power task they began last lesson. If something breaks, they apply the Debugging concept from earlier and write a RACE fix prompt. Teacher circulates with clipboard (TLAC #13 Show Call). <span class='tag tt'>BR</span> Pair-check at 5-min mark: 'Show your partner what works and what doesn't.'">
-    <div class="slide-inner">
-      <div class="ped-badge you-do reveal d1">You Do</div>
-      <h2 class="slide-title reveal d2">Your Turn</h2>
-      <div class="accent-line reveal d3"></div>
+  <section class="slide cram-slide" data-slide="8" aria-label="Your turn"
+    data-notes="<strong>You Do — finish AND debug (15 min).</strong> Students continue the same colour/sound/super-power task they began last lesson — full R/A/C/E shown on each card. If anything breaks, they apply the Debugging concept (right column): write a RACE fix prompt just like Mr Igor's. Teacher circulates with clipboard (TLAC #13 Show Call). <span class='tag tt'>BR</span> Pair-check at 5-min mark: 'Show your partner what works and what doesn't.'">
+    <div class="slide-inner" style="gap: clamp(0.4rem, 0.8vh, 0.7rem);">
 
-      <!-- TOP: big stopwatch + 10-15 minutes label — same SVG as Slide 6 -->
-      <div class="two-col" style="align-items: center; margin-top: var(--gap-sm);">
-        <div class="reveal-scale d3" style="display: flex; justify-content: center; align-items: center;">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg" aria-hidden="true">
+      <!-- TOP STRIP: badge / title / accent-line on the left, compact timer on the right -->
+      <div class="cram-header">
+        <div class="cram-header-left">
+          <div class="ped-badge you-do reveal d1">You Do</div>
+          <h2 class="slide-title reveal d2" style="margin: 0;">Your Turn</h2>
+          <div class="accent-line reveal d3" style="margin-top: 0.3em;"></div>
+        </div>
+        <div class="cram-header-right reveal-scale d3">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="timer-svg cram-timer-svg" aria-hidden="true">
             <rect x="44" y="6" width="12" height="6" rx="1.5" fill="currentColor"/>
             <line x1="50" y1="12" x2="50" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
             <rect x="18" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(-30 21 24)"/>
             <rect x="76" y="22" width="6" height="4" rx="1" fill="currentColor" transform="rotate(30 79 24)"/>
             <circle cx="50" cy="55" r="34" fill="rgba(0,255,204,0.04)" stroke="currentColor" stroke-width="2.5"/>
-            <circle cx="50" cy="55" r="30" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
             <line x1="50" y1="25" x2="50" y2="30" stroke="currentColor" stroke-width="2.5"/>
             <line x1="80" y1="55" x2="75" y2="55" stroke="currentColor" stroke-width="2.5"/>
             <line x1="50" y1="85" x2="50" y2="80" stroke="currentColor" stroke-width="2.5"/>
             <line x1="20" y1="55" x2="25" y2="55" stroke="currentColor" stroke-width="2.5"/>
-            <line x1="65" y1="29.5" x2="63" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="76.5" y1="40" x2="72.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="76.5" y1="70" x2="72.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="65" y1="80.5" x2="63" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="35" y1="80.5" x2="37" y2="76.5" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="23.5" y1="70" x2="27.5" y2="68" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="23.5" y1="40" x2="27.5" y2="42" stroke="currentColor" stroke-width="1.2"/>
-            <line x1="35" y1="29.5" x2="37" y2="33.5" stroke="currentColor" stroke-width="1.2"/>
             <line x1="50" y1="55" x2="50" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
             <line x1="50" y1="55" x2="72" y2="55" stroke="var(--magenta)" stroke-width="1.8" stroke-linecap="round" class="timer-hand-second"/>
             <circle cx="50" cy="55" r="2.5" fill="currentColor"/>
           </svg>
+          <div class="cram-timer-label">
+            <span class="cram-timer-num">10&ndash;15</span>
+            <span class="cram-timer-unit">min</span>
+            <span class="cram-timer-tag">finish <strong style="color: var(--cyan);">AND</strong> debug</span>
+          </div>
         </div>
-        <div class="reveal d4" style="display: flex; flex-direction: column; gap: var(--gap-sm); justify-content: center;">
-          <p style="font-family: var(--font-display); font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 800; color: var(--cyan); line-height: 1; letter-spacing: -0.02em;">10–15<br><span style="font-size: 0.55em; color: var(--text-primary); letter-spacing: 0.2em; text-transform: uppercase;">minutes</span></p>
-          <p class="body-text" style="color: var(--text-primary); font-size: var(--h3-size); line-height: 1.4;">
-            to <strong style="color: var(--cyan);">finish</strong> AND <strong style="color: var(--magenta);">debug</strong> your game.
+      </div>
+
+      <!-- BODY: two columns — task cards left, debugging right -->
+      <div class="cram-body">
+
+        <!-- LEFT: 3 task cards with full R/A/C/E -->
+        <div class="cram-task-col">
+          <div class="cram-task-card t1 reveal d3">
+            <span class="task-level">★ Colour Theme</span>
+            <p class="cram-task-desc">Change your Tetris block colours using a RACE prompt.</p>
+            <div class="cram-task-race">
+              <span><strong>R:</strong> Colour designer</span>
+              <span><strong>A:</strong> Change block colours</span>
+              <span><strong>C:</strong> React Tetris in Canvas</span>
+              <span><strong>E:</strong> Sunset orange &amp; pink, each block distinct</span>
+            </div>
+          </div>
+          <div class="cram-task-card t2 reveal d4">
+            <span class="task-level">★★ Sound Effect</span>
+            <p class="cram-task-desc">Add a sound when a row clears using a RACE prompt.</p>
+            <div class="cram-task-race">
+              <span><strong>R:</strong> Sound designer</span>
+              <span><strong>A:</strong> Add a sound on row clear</span>
+              <span><strong>C:</strong> Browser Tetris, Web Audio API only</span>
+              <span><strong>E:</strong> Futuristic laser zap, short &amp; punchy</span>
+            </div>
+          </div>
+          <div class="cram-task-card t3 reveal d5">
+            <span class="task-level">★★★ Super Power</span>
+            <p class="cram-task-desc">Add a bomb block after 5 rows are cleared.</p>
+            <div class="cram-task-race">
+              <span><strong>R:</strong> Game developer</span>
+              <span><strong>A:</strong> Add a bomb block after 5 rows</span>
+              <span><strong>C:</strong> React Tetris with score tracking</span>
+              <span><strong>E:</strong> Gold bomb, clears 3&times;3, explosion anim &amp; sound</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: full debugging content -->
+        <div class="cram-debug-col reveal d4">
+          <h3 class="cram-debug-title">
+            What is <span style="color: var(--magenta);">Debugging</span>?
+          </h3>
+          <p class="cram-debug-def">
+            <strong style="color: var(--magenta);">Debugging</strong> means finding and fixing problems in code. Every coder does it. The A.I. writes bugs too, and we use <strong>RACE prompts</strong> to fix them.
           </p>
+          <div class="cram-debug-img">
+            <img src="assets/Tetris_debug.jpeg" alt="Mr Igor's broken Tetris — block frozen mid-fall after pressing Space">
+          </div>
+          <p class="cram-debug-caption">
+            Mr Igor's game was broken: pressing <strong>Space</strong> froze the block mid-fall.
+          </p>
+          <div class="cram-debug-prompt">
+            <span class="cram-debug-prompt-label">Mr Igor's fix prompt (RACE)</span>
+            <p class="cram-race-line"><strong class="cram-letter r">R:</strong> You are a game developer.</p>
+            <p class="cram-race-line"><strong class="cram-letter a">A:</strong> Fix the bug where Space makes the falling block freeze instead of dropping to the bottom.</p>
+            <p class="cram-race-line"><strong class="cram-letter c">C:</strong> React-based Tetris where Space is the <em>hard-drop</em> key &ndash; it should send the current block straight to the lowest position and lock it in.</p>
+            <p class="cram-race-line"><strong class="cram-letter e">E:</strong> When Space is pressed, the block drops instantly to the floor and locks. No more freezing.</p>
+          </div>
+          <p class="cram-debug-tagline">...AND I was able to <strong style="color: var(--cyan);">fix it.</strong></p>
         </div>
       </div>
 
-      <!-- BOTTOM: condensed task reminders + debug tip -->
-      <div class="task-grid" style="margin-top: var(--gap-sm);">
-        <div class="task-card t1 reveal d5">
-          <span class="task-level">★ Colour Theme</span>
-          <p class="task-desc">Change your Tetris block colours.</p>
-        </div>
-        <div class="task-card t2 reveal d5">
-          <span class="task-level">★★ Sound Effect</span>
-          <p class="task-desc">Add a sound when a row clears.</p>
-        </div>
-        <div class="task-card t3 reveal d5">
-          <span class="task-level">★★★ Super Power</span>
-          <p class="task-desc">Bomb block every 5 rows cleared.</p>
-        </div>
-      </div>
-
-      <p class="reveal d6" style="text-align: center; font-family: var(--font-display); font-size: var(--small-size); color: var(--gold); letter-spacing: 0.12em; margin-top: var(--gap-sm); text-transform: uppercase;">
-        🛠 Bug? Write a <strong style="color: var(--magenta);">RACE fix prompt</strong> — just like Mr Igor did.
+      <!-- FOOTER: PLAN reminder -->
+      <p class="reveal d6" style="text-align: center; font-family: var(--font-display); font-size: clamp(0.7rem, 1vw, 0.9rem); color: var(--gold); letter-spacing: 0.12em; margin: 0; text-transform: uppercase;">
+        Remember: PLAN your prompt using R-A-C-E before you type!
       </p>
     </div>
   </section>
