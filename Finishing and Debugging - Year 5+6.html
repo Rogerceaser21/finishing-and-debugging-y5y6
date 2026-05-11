@@ -1119,7 +1119,8 @@ html, body {
   min-height: 0;
 }
 
-/* LEFT — 3 task cards stacked, content distributed to fill card height */
+/* LEFT — 3 task cards stacked. Each card is its OWN container.
+   Text sizes scale with the CARD'S width via cqi units (1cqi = 1% of card inline size). */
 .cram-task-col {
   display: flex;
   flex-direction: column;
@@ -1127,15 +1128,18 @@ html, body {
   min-height: 0;
 }
 .cram-task-card {
+  container-type: inline-size;
+  container-name: taskcard;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 7px;
-  padding: clamp(0.7rem, 1.4vw, 1.1rem) clamp(0.9rem, 1.6vw, 1.3rem);
+  padding: clamp(0.5rem, 1.2cqi, 1.1rem) clamp(0.7rem, 1.6cqi, 1.3rem);
   display: flex;
   flex-direction: column;
-  gap: clamp(0.4rem, 1vh, 0.65rem);
+  gap: clamp(0.3rem, 1.2cqi, 0.65rem);
   flex: 1;
   min-height: 0;
+  overflow: hidden;            /* safety net: text never bleeds past card edge */
   justify-content: space-between;
 }
 .cram-task-card.t1 { border-color: rgba(0,255,204,0.45); }
@@ -1146,23 +1150,23 @@ html, body {
 .cram-task-card.t3 .task-level { color: var(--magenta); }
 .cram-task-card .task-level {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 3rem);
+  font-size: clamp(1rem, 7.5cqi, 3rem);
   font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 1.1;
 }
 .cram-task-desc {
-  font-size: clamp(1.15rem, 2vw, 2.2rem);
+  font-size: clamp(0.85rem, 4.5cqi, 2rem);
   color: var(--text-primary);
   line-height: 1.3;
 }
 .cram-task-race {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(0.3rem, 0.8vh, 0.6rem) clamp(0.8rem, 1.5vw, 1.4rem);
+  gap: clamp(0.2rem, 1cqi, 0.6rem) clamp(0.5rem, 2.5cqi, 1.4rem);
 }
 .cram-task-race span {
-  font-size: clamp(1.05rem, 1.8vw, 2rem);
+  font-size: clamp(0.78rem, 3.9cqi, 1.7rem);
   color: #ffffff;
   line-height: 1.3;
 }
@@ -1170,29 +1174,37 @@ html, body {
 .cram-task-card.t2 .cram-task-race span strong { color: var(--blue); }
 .cram-task-card.t3 .cram-task-race span strong { color: var(--magenta); }
 
-/* RIGHT — debugging content, distributed to fill column height */
+/* Narrow card (e.g. student Chromebook, phone landscape) — flip RACE bullets to 1 column
+   so long phrases like "Sunset orange & pink, each block distinct" get the full card width. */
+@container taskcard (max-width: 480px) {
+  .cram-task-race { grid-template-columns: 1fr; }
+}
+
+/* RIGHT — debugging container with same cqi-based scaling */
 .cram-debug-col {
+  container-type: inline-size;
+  container-name: debugcard;
   background: rgba(255, 0, 170, 0.04);
   border: 1px solid rgba(255, 0, 170, 0.3);
   border-radius: 7px;
-  padding: clamp(0.7rem, 1.4vw, 1.1rem) clamp(0.9rem, 1.6vw, 1.3rem);
+  padding: clamp(0.5rem, 1.5cqi, 1.1rem) clamp(0.7rem, 1.8cqi, 1.3rem);
   display: flex;
   flex-direction: column;
-  gap: clamp(0.4rem, 1vh, 0.7rem);
+  gap: clamp(0.3rem, 1.3cqi, 0.7rem);
   min-height: 0;
   overflow: hidden;
   justify-content: space-between;
 }
 .cram-debug-title {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3.4vw, 3.4rem);
+  font-size: clamp(1.2rem, 8.5cqi, 3.4rem);
   font-weight: 700;
   line-height: 1.05;
   margin: 0;
   color: var(--text-primary);
 }
 .cram-debug-def {
-  font-size: clamp(1.15rem, 2vw, 2.2rem);
+  font-size: clamp(0.9rem, 4.6cqi, 2rem);
   line-height: 1.35;
   color: var(--text-primary);
   margin: 0;
@@ -1203,7 +1215,7 @@ html, body {
   align-items: center;
   flex: 1;
   min-height: 0;
-  max-height: clamp(160px, 28vh, 320px);
+  max-height: clamp(120px, 28vh, 320px);
   overflow: hidden;
   border-radius: 4px;
   border: 1px solid rgba(255, 0, 170, 0.25);
@@ -1216,7 +1228,7 @@ html, body {
   object-fit: contain;
 }
 .cram-debug-caption {
-  font-size: clamp(1rem, 1.7vw, 1.85rem);
+  font-size: clamp(0.8rem, 3.6cqi, 1.6rem);
   color: var(--magenta);
   text-align: center;
   line-height: 1.25;
@@ -1226,22 +1238,23 @@ html, body {
 .cram-debug-prompt {
   background: rgba(0, 0, 0, 0.3);
   border-left: 3px solid var(--magenta);
-  padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.7rem, 1.4vw, 1.2rem);
+  padding: clamp(0.4rem, 1.5cqi, 1rem) clamp(0.55rem, 1.8cqi, 1.2rem);
   border-radius: 0 4px 4px 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.2rem, 0.5vh, 0.4rem);
+  gap: clamp(0.15rem, 0.8cqi, 0.4rem);
+  overflow: hidden;
 }
 .cram-debug-prompt-label {
   font-family: var(--font-display);
-  font-size: clamp(1rem, 1.7vw, 1.85rem);
+  font-size: clamp(0.8rem, 3.6cqi, 1.6rem);
   color: var(--gold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 .cram-race-line {
-  font-size: clamp(1.05rem, 1.8vw, 2rem);
+  font-size: clamp(0.85rem, 4.2cqi, 1.85rem);
   line-height: 1.35;
   margin: 0;
   color: var(--text-primary);
@@ -1253,7 +1266,7 @@ html, body {
 .cram-letter.e { color: var(--gold); }
 .cram-debug-tagline {
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2.2vw, 2.4rem);
+  font-size: clamp(1rem, 5cqi, 2.2rem);
   color: var(--gold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1261,9 +1274,8 @@ html, body {
   margin: 0;
 }
 
-/* Mobile / very short viewports — task RACE bullets become 1-column */
-@media (max-height: 600px), (max-width: 900px) {
-  .cram-task-race { grid-template-columns: 1fr; }
+/* Very short viewports — shrink the debug image so the column stays balanced */
+@media (max-height: 600px) {
   .cram-debug-img { max-height: clamp(50px, 10vh, 90px); }
 }
 
